@@ -279,7 +279,7 @@ public class OIDCRestService {
     @NotNull
     public String retrieveUserName(KeycloakUserDetails keycloakUserDetails) {
 
-        String effLoginName = keycloakUserDetails.getName();
+        String effLoginName = keycloakUserDetails.getPreferred_username();
         if( (effLoginName == null) || effLoginName.isEmpty()){
             effLoginName = keycloakUserDetails.getPreferred_username();
             if( (effLoginName == null) || effLoginName.isEmpty()) {
