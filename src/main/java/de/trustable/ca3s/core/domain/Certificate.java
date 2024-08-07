@@ -117,15 +117,17 @@ import javax.validation.constraints.*;
     ),
 
     @NamedQuery(name = "Certificate.findActiveCertificatesBySANs",
-    query = "SELECT c as total FROM Certificate c " +
-    	" JOIN c.certificateAttributes certAtt " +
-    	" WHERE " +
-        " c.validTo >= :now and " +
-        " c.validFrom <= :now and " +
-        " c.revoked = FALSE and " +
-        " ( certAtt.name = 'TYPED_SAN' or certAtt.name = 'TYPED_VSAN') and " +
-        " certAtt.value in :sans "
+        query = "SELECT c FROM Certificate c " +
+            " JOIN c.certificateAttributes certAtt " +
+            " WHERE " +
+            " c.validTo >= :now and " +
+            " c.validFrom <= :now and " +
+            " c.revoked = FALSE and " +
+            " ( certAtt.name = 'TYPED_SAN' or certAtt.name = 'TYPED_VSAN') and " +
+            " certAtt.value in :sans " +
+            " order by c.validTo desc"
     ),
+
 
     @NamedQuery(name = "Certificate.findInactiveCertificatesByValidFrom",
     query = "SELECT c FROM Certificate c WHERE " +
@@ -138,6 +140,13 @@ import javax.validation.constraints.*;
         query = "SELECT c FROM Certificate c WHERE " +
             "c.validTo <= :now and " +
             "c.active = TRUE "
+    ),
+    @NamedQuery(name = "Certificate.findActiveCertificatesByCRLUrlSerialInList",
+        query = "SELECT c FROM Certificate c JOIN c.certificateAttributes certAtt WHERE " +
+            " certAtt.name = 'CRL_URL' and " +
+            " certAtt.value = :crlUrl and" +
+            " c.active = TRUE and " +
+            " c.serial in :serialList"
     ),
     @NamedQuery(name = "Certificate.findActiveTLSCertificate",
         query = "SELECT distinct c, certAtt.value FROM Certificate c JOIN c.certificateAttributes certAtt WHERE " +
@@ -152,11 +161,22 @@ import javax.validation.constraints.*;
             " certAtt.value not like 'ldap%'" +
             " order by certAtt.value "
     ),
+
+    @NamedQuery(name = "Certificate.findDistinctCrlURLForActiveCertificates",
+        query = "SELECT distinct certAtt.value FROM CertificateAttribute certAtt" +
+            " join certAtt.certificate c " +
+            " WHERE " +
+            " certAtt.name = 'CRL_URL' and " +
+            " c.active = TRUE" +
+            " order by certAtt.value "
+    ),
+
     @NamedQuery(name = "Certificate.findActiveCertificateBySerial",
         query = "SELECT distinct c FROM Certificate c WHERE " +
             " c.serial = :serial and " +
             " c.active = TRUE "
     ),
+
     @NamedQuery(name = "Certificate.findCrlURLForActiveCertificates",
         query = "SELECT distinct certAtt.value FROM Certificate c JOIN c.certificateAttributes certAtt WHERE " +
             " certAtt.name = 'CRL_URL' and " +
